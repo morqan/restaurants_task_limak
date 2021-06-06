@@ -161,7 +161,7 @@ export default LogInScreen;
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#000'
+        backgroundColor: '#FF6347'
     },
     header: {
         flex: 1,

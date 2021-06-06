@@ -15,6 +15,7 @@ import {
   DefaultTheme as PaperDefaultTheme,
   DarkTheme as PaperDarkTheme } from 'react-native-paper';
 import LogInScreen from "./screens/LogInScreen";
+import MapScreen from "./screens/MapScreen";
 import Feather from "react-native-vector-icons/Feather";
 
 const App: () => Node = () => {
@@ -26,8 +27,9 @@ const App: () => Node = () => {
 
   return (
       <PaperProvider >
-      <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} />
-     <LogInScreen/>
+        <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} />
+        {/*<LogInScreen/>*/}
+        <MapScreen/>
       </PaperProvider>
   );
 };
