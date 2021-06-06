@@ -8,49 +8,14 @@
 
 import React from 'react';
 import type {Node} from 'react';
+import {SafeAreaView, StatusBar, StyleSheet, TextInput, TouchableOpacity, useColorScheme, View,} from 'react-native';
+import {Colors} from 'react-native/Libraries/NewAppScreen';
 import {
-  SafeAreaView,
-  ScrollView,
-  StatusBar,
-  StyleSheet,
-  Text,
-  useColorScheme,
-  View,
-} from 'react-native';
-import LinearGradient from 'react-native-linear-gradient';
-import {
-  Colors,
-  DebugInstructions,
-  Header,
-  ReloadInstructions,
-} from 'react-native/Libraries/NewAppScreen';
-import Feather from 'react-native-vector-icons/Feather';
-
-const Section = ({children, title}): Node => {
-  const isDarkMode = useColorScheme() === 'dark';
-  return (
-    <View style={styles.sectionContainer}>
-      <Text
-        style={[
-          styles.sectionTitle,
-          {
-            color: isDarkMode ? Colors.white : Colors.black,
-          },
-        ]}>
-        {title}
-      </Text>
-      <Text
-        style={[
-          styles.sectionDescription,
-          {
-            color: isDarkMode ? Colors.light : Colors.dark,
-          },
-        ]}>
-        {children}
-      </Text>
-    </View>
-  );
-};
+  Provider as PaperProvider,
+  DefaultTheme as PaperDefaultTheme,
+  DarkTheme as PaperDarkTheme } from 'react-native-paper';
+import LogInScreen from "./screens/LogInScreen";
+import Feather from "react-native-vector-icons/Feather";
 
 const App: () => Node = () => {
   const isDarkMode = useColorScheme() === 'dark';
@@ -60,41 +25,10 @@ const App: () => Node = () => {
   };
 
   return (
-    <SafeAreaView style={backgroundStyle}>
+      <PaperProvider >
       <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} />
-      <ScrollView
-        contentInsetAdjustmentBehavior="automatic"
-        style={backgroundStyle}>
-        <Header />
-        <View
-          style={{
-            backgroundColor: isDarkMode ? Colors.black : Colors.white,
-          }}>
-          <Section title="Step One">
-            Edit <Text style={styles.highlight}>App.js</Text> to change this
-            screen and then come back to see your edits.
-          </Section>
-          <Section title="See Your Changes">
-            <ReloadInstructions />
-          </Section>
-          <Section title="Debug">
-            <DebugInstructions />
-          </Section>
-          <Section title="Learn More">
-            <LinearGradient colors={['#4c669f', '#3b5998', '#192f6a']} style={styles.linearGradient}>
-              <Text style={styles.buttonText}>
-                Sign in with Facebook
-              </Text>
-              <Feather
-                  name="check-circle"
-                  color="green"
-                  size={20}
-              />
-            </LinearGradient>
-          </Section>
-        </View>
-      </ScrollView>
-    </SafeAreaView>
+     <LogInScreen/>
+      </PaperProvider>
   );
 };
 
