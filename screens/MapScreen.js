@@ -1,9 +1,13 @@
 import React, { useState, useEffect, useRef } from 'react'
-import { Alert, Linking, PermissionsAndroid, Platform, ToastAndroid, View, StyleSheet } from 'react-native'
+import { Alert, Linking, PermissionsAndroid, Platform, ToastAndroid, View, StyleSheet, Animated, Image, Dimensions } from 'react-native'
 import MapView, { PROVIDER_GOOGLE } from 'react-native-maps'
 import Geolocation from 'react-native-geolocation-service'
 import axios from "axios";
 
+const { width, height } = Dimensions.get("window");
+const CARD_HEIGHT = 220;
+const CARD_WIDTH = width * 0.8;
+const SPACING_FOR_CARD_INSET = width * 0.1 - 10;
 const MapScreen = () => {
     const mapRef = useRef(null)
     const [region, setRegion] = useState({
@@ -12,6 +16,9 @@ const MapScreen = () => {
         latitudeDelta: 0.01,
         longitudeDelta: 0.01
     })
+    const [restaurants, setRestaurants] = useState([])
+    const [loading, setLoading] = useState(true)
+    let mapAnimation = new Animated.Value(0);
     const hasLocationPermissionIOS = async () => {
         const openSetting = () => {
             Linking.openSettings().catch(() => { Alert.alert('Unable to open settings') })
@@ -63,33 +70,92 @@ const MapScreen = () => {
             )
         })
     }
+    const interpolations = restaurants.map((marker, index) => {
+        // console.log(marker.geometry.location)
+        const inputRange = [
+            (index - 1) * CARD_WIDTH,
+            index * CARD_WIDTH,
+            ((index + 1) * CARD_WIDTH),
+        ];
+
+        const scale = mapAnimation.interpolate({
+            inputRange,
+            outputRange: [1, 1.5, 1],
+            extrapolate: "clamp"
+        });
+
+        return { scale };
+    });
+    const onMarkerPress = (mapEventData) => {
+        const markerID = mapEventData._targetInst.return.key;
+
+        let x = (markerID * CARD_WIDTH) + (markerID * 20);
+        if (Platform.OS === 'ios') {
+            x = x - SPACING_FOR_CARD_INSET;
+        }
+
+        // _scrollView.current.scrollTo({x: x, y: 0, animated: true});
+    }
     useEffect(() => {
         async function fetchGeoInfo () {
             let response = await getGeoInfo()
             const {latitude, longitude} = response
-            // let newCoordinate = { latitude, longitude }
-            // if (mapRef.current) {
-            //     mapRef.current.animateCamera({center: newCoordinate, pitch: 2, heading: 20, altitude: 200, zoom: 17}, 1500)
-            // }
+            setRegion({ ...region, latitude, longitude })
+            let newCoordinate = { latitude, longitude }
+            if (mapRef.current) {
+                mapRef.current.animateCamera({center: newCoordinate, pitch: 2, heading: 20, altitude: 200, zoom: 11}, 1500)
+            }
             const url = 'https://maps.googleapis.com/maps/api/place/nearbysearch/json?' + 'location=' + latitude + ',' + longitude + '&radius=3000&type=restaurant&key=AIzaSyCMfIpRhn8QaGkYQ0I5KPWvFT1kLbA-DAM';
             const restaurantsList = await axios.get(url)
+
+            setRestaurants(restaurantsList.data.results)
+            setLoading(false)
             console.log(restaurantsList.data.results)
-            setRegion({ ...region, latitude, longitude })
         }
 
         fetchGeoInfo().then()
     }, [])
+    if (loading) return null
     return (
         <View style={styles.container}>
             <MapView style={styles.container}
                      ref={mapRef}
-                     region={region}
+                     // region={region}
+                     initialCamera={{
+                         center: { latitude: region.latitude, longitude: region.longitude },
+                         pitch: 0,
+                         zoom: 13,
+                         heading: 0,
+                         altitude: 0
+                     }}
                 // onRegionChangeComplete={region => setRegion(region)}
                      provider={PROVIDER_GOOGLE}
                      showsUserLocation
                      followsUserLocation
-                     showsMyLocationButton={false}
-            />
+                     showsMyLocationButton={false} >
+                {restaurants && restaurants.map((marker, index) => {
+                    const latitude = marker.geometry.location.lat
+                    const longitude = marker.geometry.location.lng
+                    const coordinate = {latitude: latitude, longitude: longitude}
+                    const scaleStyle = {
+                        transform: [
+                            {
+                                scale: interpolations[index].scale,
+                            },
+                        ],
+                    };
+                    return (
+                        <MapView.Marker key={index} coordinate={coordinate} onPress={(e)=>onMarkerPress(e)}>
+                            <Animated.View style={[styles.markerWrap]}>
+                                <Animated.Image
+                                    source={require('../assets/map_marker.png')}
+                                    style={[styles.marker, scaleStyle]}
+                                    resizeMode="cover" />
+                            </Animated.View>
+                        </MapView.Marker>
+                    );
+                })}
+            </MapView>
         </View>
     );
 };
@@ -99,6 +165,15 @@ export default MapScreen;
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-
+    },
+    markerWrap: {
+        alignItems: "center",
+        justifyContent: "center",
+        width:50,
+        height:50,
+    },
+    marker: {
+        width: 30,
+        height: 30,
     },
 });
