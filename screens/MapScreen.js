@@ -105,7 +105,7 @@ const MapScreen = () => {
             if (mapRef.current) {
                 mapRef.current.animateCamera({center: newCoordinate, pitch: 2, heading: 20, altitude: 200, zoom: 11}, 1500)
             }
-            const url = 'https://maps.googleapis.com/maps/api/place/nearbysearch/json?' + 'location=' + latitude + ',' + longitude + '&radius=3000&type=restaurant&key=AIzaSyCMfIpRhn8QaGkYQ0I5KPWvFT1kLbA-DAM';
+            const url = 'https://maps.googleapis.com/maps/api/place/nearbysearch/json?' + 'location=' + latitude + ',' + longitude + '&radius=3000&type=restaurant&key=AIzaSyAE-XLvU5nLW3VvlQdHjvMduOc8K9B2xn4';
             const restaurantsList = await axios.get(url)
 
             setRestaurants(restaurantsList.data.results)
